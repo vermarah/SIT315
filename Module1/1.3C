@@ -1,0 +1,40 @@
+// C++ code
+//
+
+//will give output on buzzer
+const int buzzer_sensor = 2;                //setting up the pins for the sensors
+const int led_sensor = 3;                   //will give output on led
+const int led_pin = 12;
+const int buzz_pin = 7;
+
+void setup()
+{
+   
+  pinMode(led_pin, OUTPUT);            //setting up the output/input pins for the sensors
+  pinMode(led_sensor, INPUT_PULLUP);
+  pinMode(buzz_pin, OUTPUT);
+  pinMode(buzzer_sensor, INPUT_PULLUP);
+  
+   
+  attachInterrupt(digitalPinToInterrupt(buzzer_sensor),buzz,CHANGE);  //attach interupt for two different functions which are buzz and led
+  attachInterrupt(digitalPinToInterrupt(led_sensor),led,CHANGE);
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  //nothing here
+}
+
+
+void led()
+{
+  digitalWrite(led_pin, HIGH);             //setting the value of led to on
+  Serial.println("The led would glow sensed motion");
+}
+      
+void buzz()
+{
+  tone(buzz_pin, 1000);                ////setting the value of buzzer to on
+  Serial.println("The buzzer sounds as sensed motion");
+}
