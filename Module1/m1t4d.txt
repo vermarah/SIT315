@@ -1,0 +1,74 @@
+// C++ code
+//
+
+//will give output on buzzer
+int white_sensor = 2;                //setting up the pins for the sensors
+int yellow_sensor = 3;                   //will give output on led
+int blue_sensor = 4;
+
+int white_led_pin = 13;
+int yellow_led_pin = 12;
+int blue_led_pin = 11;
+
+int buzz_pin = 7;
+
+void setup()
+{
+   
+  pinMode(white_led_pin, OUTPUT);            //setting up the output/input pins for the sensors
+  pinMode(white_sensor, INPUT_PULLUP);
+  pinMode(yellow_led_pin, OUTPUT);
+  pinMode(yellow_sensor, INPUT_PULLUP);
+  pinMode(blue_led_pin, OUTPUT);
+  pinMode(blue_sensor, INPUT_PULLUP);
+  
+  pinMode(buzz_pin, OUTPUT);
+  noInterrupts();
+  
+  TCCR1A = 0;       //Clearing default registers
+  TCCR1B = 0;
+  TCNT1 = 0;
+  
+  //(16000000 / (prescaler * desired interrupt frequency)) - 1
+  // 5 Hz (16000000/(1024*(3124+1)))
+  OCR1A = 3124;
+  // CTC
+  TCCR1B |= (1 << WGM12);
+  // Prescaler 1024
+  TCCR1B |= (1 << CS12) | (1 << CS10);
+  
+  TIMSK1 |= (1 << OCIE1A);     //enabling timer compare interrupt
+  interrupts();
+  
+  PCICR |= 0b00000100;  //Enabling port D interrupts
+  PCMSK2 |=0b00011100;
+  
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  digitalWrite(13,white_led_pin);            //assigning the values in loop
+  digitalWrite(12,yellow_led_pin);
+  digitalWrite(11,blue_led_pin);
+}
+
+ISR(PCINT2_vect)
+{
+  
+  
+  white_led_pin=PIND & B00001000;
+  white_led_pin&&Serial.println("white");
+  
+  yellow_led_pin=PIND & B00000100;
+  yellow_led_pin&&Serial.println("yellow");
+
+  blue_led_pin=PIND & B00010000;
+  blue_led_pin&&Serial.println("blue");
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+  digitalWrite(buzz_pin,digitalRead(buzz_pin)^1);
+  buzz_pin&&Serial.println("buzzzzz");
+}
