@@ -10,6 +10,9 @@ int white_led_pin = 13;
 int yellow_led_pin = 12;
 int blue_led_pin = 11;
 
+int initial_state1 = LOW;
+int initial_state2 = LOW;
+int initial_state3 = LOW;
 int buzz_pin = 7;
 
 void setup()
@@ -35,36 +38,47 @@ void setup()
   // CTC
   TCCR1B |= (1 << WGM12);
   // Prescaler 1024
-  TCCR1B |= (1 << CS12) | (1 << CS10);
+  TCCR1B |= (1 << CS12) | (0 << CS11) | (1 << CS10);
   
   TIMSK1 |= (1 << OCIE1A);     //enabling timer compare interrupt
   interrupts();
   
   PCICR |= 0b00000100;  //Enabling port D interrupts
-  PCMSK2 |=0b00011100;
+  PCMSK2 |=0b00010000;
+  
+  attachInterrupt(digitalPinToInterrupt(2), func2, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(3), func3, CHANGE);
   
   Serial.begin(9600);
 }
 
 void loop()
 {
-  digitalWrite(13,white_led_pin);            //assigning the values in loop
-  digitalWrite(12,yellow_led_pin);
-  digitalWrite(11,blue_led_pin);
+  	/*
+  	digitalWrite(11, state1);
+  	digitalWrite(13, state2);
+  	digitalWrite(12, state3);
+	*/
+              //assigning the values in loop
 }
+
+void func2()
+{
+    initial_state2=!initial_state2;
+    Serial.println("White LED ON");
+}
+
+void func3()
+{
+    initial_state3=!initial_state3;
+    Serial.println("Yellow LED ON");
+}
+
 
 ISR(PCINT2_vect)
 {
-  
-  
-  white_led_pin=PIND & B00001000;
-  white_led_pin&&Serial.println("white");
-  
-  yellow_led_pin=PIND & B00000100;
-  yellow_led_pin&&Serial.println("yellow");
-
-  blue_led_pin=PIND & B00010000;
-  blue_led_pin&&Serial.println("blue");
+    blue_led_pin = PIND & B00010000;
+    Serial.println("Blue LED ON");
 }
 
 ISR(TIMER1_COMPA_vect)
